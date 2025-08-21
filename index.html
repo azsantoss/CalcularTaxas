@@ -1,65 +1,248 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="author" content="Anderson Santos">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Simulador de Taxas - Cartão de Crédito</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: Arial, sans-serif;
-      margin: 40px;
+      margin: 20px;
       background: #f8f9fa;
       color: #333;
+      overflow-x: hidden;
+      transition: background 0.3s, color 0.3s;
     }
-    h1,h2 {
+
+    h1,
+    h2 {
       text-align: center;
       color: #222;
+      margin-bottom: 10px;
+      transition: color 0.3s;
     }
+
     .container {
       max-width: 400px;
-      margin: auto;
+      width: 100%;
+      margin: 20px auto;
       padding: 20px;
       background: white;
       border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      transition: background 0.3s, box-shadow 0.3s;
     }
-    label, select, input, button {
+
+    label,
+    select,
+    input,
+    button {
       display: block;
       width: 100%;
       margin-bottom: 15px;
       font-size: 16px;
     }
+
+    input,
+    select {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      transition: background 0.3s, color 0.3s, border 0.3s;
+    }
+
     button {
       background: #007bff;
       color: white;
       border: none;
-      padding: 12px;
+      padding: 16px;
       border-radius: 8px;
       cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s, color 0.3s;
     }
+
     button:hover {
       background: #0056b3;
     }
+
     .resultado {
       background: #e9ecef;
       padding: 15px;
       border-radius: 8px;
       font-weight: bold;
       text-align: center;
+      transition: background 0.3s, color 0.3s;
     }
+
     .valor-final {
-      font-size: 28px;   /* Aumentei a fonte */
+      font-size: 28px;
       color: #0a8a3a;
       margin-top: 15px;
       font-weight: bold;
     }
+
+    .taxas p {
+      margin: 5px 0;
+      font-size: 16px;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 14px;
+      color: #555;
+      margin-top: 20px;
+    }
+
+    /* Responsivo Mobile */
+    @media (max-width: 480px) {
+      body {
+        margin: 10px;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+
+      h2 {
+        font-size: 16px;
+      }
+
+      label,
+      input,
+      select,
+      button {
+        font-size: 14px;
+      }
+
+      button {
+        padding: 14px;
+      }
+
+      .valor-final {
+        font-size: 24px;
+      }
+
+      .container {
+        padding: 15px;
+      }
+    }
+
+    /* Modo Escuro */
+    .dark-mode {
+      background: #121212;
+      color: #f0f0f0;
+    }
+
+    .dark-mode h1,
+    .dark-mode h2,
+    .dark-mode footer {
+      color: #f0f0f0;
+    }
+
+    .dark-mode .container {
+      background: #1e1e1e;
+      box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+    }
+
+    .dark-mode input,
+    .dark-mode select {
+      background: #2b2b2b;
+      color: #f0f0f0;
+      border: 1px solid #555;
+    }
+
+    .dark-mode button {
+      background: #c0c0c2;
+      color: #121212;
+    }
+
+    .dark-mode button:hover {
+      background: #9b5fe0;
+    }
+
+    .dark-mode .resultado {
+      background: #2b2b2b;
+      color: #f0f0f0;
+    }
+
+    /* Switch deslizante */
+    .switch-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      gap: 10px;
+      justify-content: flex-end;
+      font-size: 14px;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 20px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      border-radius: 20px;
+      transition: 0.4s;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      border-radius: 50%;
+      transition: 0.4s;
+    }
+
+    input:checked+.slider {
+      background-color: #007bff;
+    }
+
+    input:checked+.slider:before {
+      transform: translateX(20px);
+    }
   </style>
 </head>
+
 <body>
   <h1>Simulador de Taxas</h1>
-
   <h2>Anderson Santos</h2>
+
   <div class="container">
+    <!-- Toggle deslizante de modo escuro -->
+    <div class="switch-container">
+      <label class="switch">
+        <input type="checkbox" id="darkModeToggle">
+        <span class="slider"></span>
+      </label>
+      <span>Modo Escuro</span>
+    </div>
+
     <label>Valor da compra (R$):</label>
     <input type="number" id="valor" placeholder="Ex: 1000" step="0.01">
 
@@ -94,55 +277,44 @@
         return;
       }
 
-      // Tabela de taxas de processamento
       let taxaProcessamento = 0;
-      if (parcelas === 1) {
-        taxaProcessamento = 3.16;
-      } else if (parcelas >= 2 && parcelas <= 6) {
-        taxaProcessamento = 2.74;
-      } else if (parcelas >= 7 && parcelas <= 12) {
-        taxaProcessamento = 2.69;
-      } else if (parcelas >= 13 && parcelas <= 18) {
-        taxaProcessamento = 2.69;
-      }
+      if (parcelas === 1) { taxaProcessamento = 3.16; }
+      else if (parcelas >= 2 && parcelas <= 6) { taxaProcessamento = 2.74; }
+      else if (parcelas >= 7 && parcelas <= 12) { taxaProcessamento = 2.69; }
 
-      // Tabela de taxas de parcelamento
       const taxasParcelamento = {
-        2: 2.85,
-        3: 3.61,
-        4: 4.36,
-        5: 5.05,
-        6: 5.75,
-        7: 6.67,
-        8: 7.25,
-        9: 8.38,
-        10: 8.80,
-        11: 9.88,
-        12: 10.50
+        2: 2.85, 3: 3.61, 4: 4.36, 5: 5.05, 6: 5.75,
+        7: 6.67, 8: 7.25, 9: 8.38, 10: 8.80, 11: 9.88, 12: 10.50
       };
 
       let taxaParcela = taxasParcelamento[parcelas] || 0;
-
-      // Soma das taxas
       const taxaTotal = taxaProcessamento + taxaParcela;
-
-      // Valor líquido (descontando ambas as taxas)
       const valorLiquido = valor - (valor * (taxaTotal / 100));
-
-      // Valor da parcela = valor bruto dividido pelo número de parcelas
       const valorParcela = parcelas > 1 ? valor / parcelas : valor;
 
+
       document.getElementById("resultado").innerHTML =
-        `📌 Taxa de processamento: <b>${taxaProcessamento.toFixed(2)}%</b><br>
-         📌 Taxa de parcelamento: <b>${taxaParcela.toFixed(2)}%</b><br>
-         📌 <b>Total de taxas: ${taxaTotal.toFixed(2)}%</b><br><br>
-         💰 Valor bruto: R$ ${valor.toFixed(2)}<br>
-         💳 Parcelas de: R$ ${valorParcela.toFixed(2)} (${parcelas}x)<br>
-         <div class="valor-final">✅ Valor líquido final: R$ ${valorLiquido.toFixed(2)}</div>`;
+        `<div class="taxas">
+          <p>Taxa de processamento: <b>${taxaProcessamento.toFixed(2)}%</b></p>
+          <p>Taxa de parcelamento: <b>${taxaParcela.toFixed(2)}%</b></p>
+          <p>📌 Total de taxas: <b>${taxaTotal.toFixed(2)}%</b></p>
+        </div>
+        <br>
+
+        💰 Valor bruto: ${valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}<br>
+        💳 Parcelas de: ${valorParcela.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} (${parcelas}x)<br>
+        <div class="valor-final">✅ Valor líquido final: ${valorLiquido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>`;
+      ;
     }
+
+    // Toggle deslizante de modo escuro
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    darkModeToggle.addEventListener('change', () => {
+      document.body.classList.toggle('dark-mode', darkModeToggle.checked);
+    });
   </script>
+
+  <footer>Criado por AzSantos</footer>
 </body>
-<footer style="text-align:center; font-size:14px; color:#555; margin-top:20px;">
-  Criado por AzSantos
-</footer>
+
 </html>
