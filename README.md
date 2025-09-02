@@ -1,7 +1,7 @@
 # <p align="center">Projeto Calculadora-TAXAS</p>
 
 <p align="center">
-  <img alt="calculadora-taxas" src=".github/taxas.png" width="100%">
+  <img alt="calculadora-taxas" src="./taxas.png" width="100%">
 </p>
 
 ## 📖 Sobre
