@@ -1,6 +1,6 @@
 # <p align="center">Projeto Calculadora-TAXAS</p>
 
-<p align="center">Acesse: <a href="https://azsantoss.github.io/calculartaxas/" target="_blank">azsantoss.github.io/CalcularTaxas<a></p>
+<p align="center">Acesse: <a href="https://azsantoss.github.io/CalcularTaxas/" target="_blank">azsantoss.github.io/CalcularTaxas<a></p>
 
 <p align="center">
   <img alt="calculadora-taxas" src="./taxas.png" width="100%">
