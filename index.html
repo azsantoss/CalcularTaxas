@@ -88,6 +88,13 @@
       font-weight: bold;
     }
 
+    .valor-bruto {
+      font-size: 32px;
+      color: #0a8a3a;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
     .taxas p {
       margin: 5px 0;
       font-size: 16px;
@@ -100,8 +107,7 @@
       margin-top: 20px;
     }
 
-    /* Responsivo Mobile */
-    @media (max-width: 480px) {
+    @media (max-width:480px) {
       body {
         margin: 10px;
       }
@@ -132,6 +138,10 @@
       .container {
         padding: 15px;
       }
+
+      .valor-bruto {
+        font-size: 26px;
+      }
     }
 
     /* Modo Escuro */
@@ -148,7 +158,7 @@
 
     .dark-mode .container {
       background: #1e1e1e;
-      box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+      box-shadow: 0 2px 8px rgba(255, 255, 255, 0.06);
     }
 
     .dark-mode input,
@@ -172,7 +182,12 @@
       color: #f0f0f0;
     }
 
-    /* Switch deslizante */
+    .dark-mode .valor-final,
+    .dark-mode .valor-bruto {
+      color: #7ee4a3;
+    }
+
+    /* Switch */
     .switch-container {
       display: flex;
       align-items: center;
@@ -234,7 +249,6 @@
   <h2>Anderson Santos</h2>
 
   <div class="container">
-    <!-- Toggle deslizante de modo escuro -->
     <div class="switch-container">
       <label class="switch">
         <input type="checkbox" id="darkModeToggle">
@@ -243,11 +257,29 @@
       <span>Modo Escuro</span>
     </div>
 
-    <label>Valor da compra (R$):</label>
-    <input type="number" id="valor" placeholder="Ex: 1000" step="0.01">
+    <!-- Seleção da modalidade -->
+    <label>Selecione a modalidade:</label>
+    <select id="modalidade" onchange="toggleCampos()">
+      <option value="">-- Escolha --</option>
+      <option value="cobra">Valor a cobrar</option>
+      <option value="receber">Quanto deseja receber</option>
+    </select>
 
+    <!-- Campo Valor a cobrar -->
+    <div id="campoCobra" style="display:none;">
+      <label>Valor a <b>cobrar</b> (R$):</label>
+      <input type="number" id="valor" placeholder="Ex: 1000" step="0.01" oninput="calcular()">
+    </div>
+
+    <!-- Campo Quanto deseja receber -->
+    <div id="campoReceber" style="display:none;">
+      <label>Quanto você quer <b>receber</b> (R$):</label>
+      <input type="number" id="receber" placeholder="Ex: 900" step="0.01" oninput="calcular()">
+    </div>
+
+    <!-- Número de parcelas -->
     <label>Número de parcelas:</label>
-    <select id="parcelas">
+    <select id="parcelas" onchange="calcular()">
       <option value="1">À vista</option>
       <option value="2">2x</option>
       <option value="3">3x</option>
@@ -262,52 +294,131 @@
       <option value="12">12x</option>
     </select>
 
-    <button onclick="calcular()">Calcular</button>
+    <!-- Botão pode até ser opcional agora 
+    <button onclick="calcular()">Calcular</button>-->
 
     <div id="resultado" class="resultado"></div>
   </div>
 
   <script>
+    // Inicial: desabilita inputs até modalidade ser escolhida
+    document.getElementById('valor').disabled = true;
+    document.getElementById('receber').disabled = true;
+
+    function toggleCampos() {
+      const modalidade = document.getElementById("modalidade").value;
+      const campoCobra = document.getElementById("campoCobra");
+      const campoReceber = document.getElementById("campoReceber");
+      const inputValor = document.getElementById("valor");
+      const inputReceber = document.getElementById("receber");
+
+      if (modalidade === "cobra") {
+        campoCobra.style.display = "block";
+        campoReceber.style.display = "none";
+        // habilita o campo visível e limpa/desabilita o oculto
+        inputValor.disabled = false;
+        inputReceber.value = "";
+        inputReceber.disabled = true;
+        inputValor.focus();
+      } else if (modalidade === "receber") {
+        campoCobra.style.display = "none";
+        campoReceber.style.display = "block";
+        inputReceber.disabled = false;
+        inputValor.value = "";
+        inputValor.disabled = true;
+        inputReceber.focus();
+      } else {
+        // nenhum escolhido
+        campoCobra.style.display = "none";
+        campoReceber.style.display = "none";
+        document.getElementById("valor").value = "";
+        document.getElementById("receber").value = "";
+        document.getElementById("valor").disabled = true;
+        document.getElementById("receber").disabled = true;
+      }
+
+      // Limpa resultado quando troca de modalidade para evitar confusão
+      document.getElementById("resultado").innerHTML = "";
+    }
+
     function calcular() {
-      const valor = parseFloat(document.getElementById("valor").value);
+      const modalidade = document.getElementById("modalidade").value;
       const parcelas = parseInt(document.getElementById("parcelas").value);
 
-      if (isNaN(valor) || valor <= 0) {
-        document.getElementById("resultado").innerHTML = "⚠️ Informe um valor válido.";
+      if (!modalidade) {
+        document.getElementById("resultado").innerHTML = "⚠️ Selecione a modalidade (Valor a cobrar ou Quanto deseja receber).";
         return;
       }
 
-      let taxaProcessamento = 0;
-      if (parcelas === 1) { taxaProcessamento = 3.16; }
-      else if (parcelas >= 2 && parcelas <= 6) { taxaProcessamento = 2.74; }
-      else if (parcelas >= 7 && parcelas <= 12) { taxaProcessamento = 2.69; }
-
+      // Taxas de parcelamento
       const taxasParcelamento = {
         2: 2.85, 3: 3.61, 4: 4.36, 5: 5.05, 6: 5.75,
         7: 6.67, 8: 7.25, 9: 8.38, 10: 8.80, 11: 9.88, 12: 10.50
       };
 
-      let taxaParcela = taxasParcelamento[parcelas] || 0;
-      const taxaTotal = taxaProcessamento + taxaParcela;
-      const valorLiquido = valor - (valor * (taxaTotal / 100));
-      const valorParcela = parcelas > 1 ? valor / parcelas : valor;
+      let taxaProcessamento = 0;
+      let taxaParcela = 0;
 
+      if (parcelas === 1) {
+        taxaProcessamento = 3.16;
+        taxaParcela = 0;
+      } else if (parcelas >= 2 && parcelas <= 6) {
+        taxaProcessamento = 2.74;
+        taxaParcela = taxasParcelamento[parcelas];
+      } else if (parcelas >= 7 && parcelas <= 12) {
+        taxaProcessamento = 2.69;
+        taxaParcela = taxasParcelamento[parcelas];
+      }
+
+      const taxaTotal = taxaProcessamento + taxaParcela;
+
+      let valorBruto = 0;
+      let valorLiquido = 0;
+      let destaqueHTML = "";
+
+      if (modalidade === "cobra") {
+        const valorInput = parseFloat(document.getElementById("valor").value);
+        if (!valorInput || valorInput <= 0) {
+          document.getElementById("resultado").innerHTML = "⚠️ Informe um valor a cobrar válido.";
+          return;
+        }
+        valorBruto = valorInput;
+        valorLiquido = valorBruto - (valorBruto * (taxaTotal / 100));
+
+        destaqueHTML = `<div class="valor-final">✅ Recebe: ${valorLiquido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>`;
+      } else if (modalidade === "receber") {
+        const receberInput = parseFloat(document.getElementById("receber").value);
+        if (!receberInput || receberInput <= 0) {
+          document.getElementById("resultado").innerHTML = "⚠️ Informe um valor de recebimento válido.";
+          return;
+        }
+        valorLiquido = receberInput;
+
+        // Proteção: caso as taxas somem >= 100% evita divisão por zero/valor infinito
+        if (taxaTotal >= 100) {
+          document.getElementById("resultado").innerHTML = "⚠️ Taxas muito altas (>=100%), não é possível calcular.";
+          return;
+        }
+
+        valorBruto = valorLiquido / (1 - (taxaTotal / 100));
+
+        destaqueHTML = `<div class="valor-bruto">💰 Cobrar: ${valorBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>`;
+      }
+
+      const valorParcela = parcelas > 1 ? (valorBruto / parcelas) : valorBruto;
 
       document.getElementById("resultado").innerHTML =
         `<div class="taxas">
-          <p>Taxa de processamento: <b>${taxaProcessamento.toFixed(2)}%</b></p>
-          <p>Taxa de parcelamento: <b>${taxaParcela.toFixed(2)}%</b></p>
-          <p>📌 Total de taxas: <b>${taxaTotal.toFixed(2)}%</b></p>
-        </div>
-        <br>
-
-        💰 Valor bruto: ${valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}<br>
-        💳 Parcelas de: ${valorParcela.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} (${parcelas}x)<br>
-        <div class="valor-final">✅ Valor líquido final: ${valorLiquido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>`;
-      ;
+           <p>Taxa de processamento: <b>${taxaProcessamento.toFixed(2)}%</b></p>
+           <p>Taxa de parcelamento: <b>${taxaParcela.toFixed(2)}%</b></p>
+           <p>📌 Total de taxas: <b>${taxaTotal.toFixed(2)}%</b></p>
+         </div>
+         <br>
+         💳 Parcelas de: ${valorParcela.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} (${parcelas}x)<br>
+         ${destaqueHTML}`;
     }
 
-    // Toggle deslizante de modo escuro
+    // Toggle modo escuro
     const darkModeToggle = document.getElementById('darkModeToggle');
     darkModeToggle.addEventListener('change', () => {
       document.body.classList.toggle('dark-mode', darkModeToggle.checked);
