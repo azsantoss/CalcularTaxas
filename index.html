@@ -352,21 +352,21 @@
 
       // Taxas de parcelamento
       const taxasParcelamento = {
-        2: 2.85, 3: 3.61, 4: 4.36, 5: 5.05, 6: 5.75,
-        7: 6.67, 8: 7.25, 9: 8.38, 10: 8.80, 11: 9.88, 12: 10.50
+        2: 2.80, 3: 3.58, 4: 4.44, 5: 5.25, 6: 5.80,
+        7: 6.97, 8: 7.53, 9: 8.82, 10: 8.85, 11: 10.27, 12: 10.55
       };
 
       let taxaProcessamento = 0;
       let taxaParcela = 0;
 
       if (parcelas === 1) {
-        taxaProcessamento = 3.16;
+        taxaProcessamento = 3.31;
         taxaParcela = 0;
       } else if (parcelas >= 2 && parcelas <= 6) {
-        taxaProcessamento = 2.74;
+        taxaProcessamento = 2.89;
         taxaParcela = taxasParcelamento[parcelas];
       } else if (parcelas >= 7 && parcelas <= 12) {
-        taxaProcessamento = 2.69;
+        taxaProcessamento = 2.94;
         taxaParcela = taxasParcelamento[parcelas];
       }
 
@@ -429,3 +429,4 @@
 </body>
 
 </html>
+
