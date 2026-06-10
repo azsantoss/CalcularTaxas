@@ -246,7 +246,7 @@
 
 <body>
   <h1>Simulador de Taxas</h1>
-  <h2>Anderson Santos</h2>
+  <!-- <h2>Anderson Santos</h2> -->
 
   <div class="container">
     <div class="switch-container">
@@ -257,7 +257,12 @@
       <span>Modo Escuro</span>
     </div>
 
-    <!-- Seleção da modalidade -->
+    <label>Selecione a Maquininha:</label>
+    <select id="maquininha" onchange="calcular()">
+      <option value="mercado_pago">Mercado Pago</option>
+      <option value="pagbank">PagBank</option>
+    </select>
+
     <label>Selecione a modalidade:</label>
     <select id="modalidade" onchange="toggleCampos()">
       <option value="">-- Escolha --</option>
@@ -265,19 +270,16 @@
       <option value="receber">Quanto deseja receber</option>
     </select>
 
-    <!-- Campo Valor a cobrar -->
     <div id="campoCobra" style="display:none;">
       <label>Valor a <b>cobrar</b> (R$):</label>
       <input type="number" id="valor" placeholder="Ex: 1000" step="0.01" oninput="calcular()">
     </div>
 
-    <!-- Campo Quanto deseja receber -->
     <div id="campoReceber" style="display:none;">
       <label>Quanto você quer <b>receber</b> (R$):</label>
       <input type="number" id="receber" placeholder="Ex: 900" step="0.01" oninput="calcular()">
     </div>
 
-    <!-- Número de parcelas -->
     <label>Número de parcelas:</label>
     <select id="parcelas" onchange="calcular()">
       <option value="1">À vista</option>
@@ -292,10 +294,13 @@
       <option value="10">10x</option>
       <option value="11">11x</option>
       <option value="12">12x</option>
+      <!-- <option value="13">13x</option>
+      <option value="14">14x</option>
+      <option value="15">15x</option>
+      <option value="16">16x</option>
+      <option value="17">17x</option>
+      <option value="18">18x</option> -->
     </select>
-
-    <!-- Botão pode até ser opcional agora 
-    <button onclick="calcular()">Calcular</button>-->
 
     <div id="resultado" class="resultado"></div>
   </div>
@@ -315,7 +320,6 @@
       if (modalidade === "cobra") {
         campoCobra.style.display = "block";
         campoReceber.style.display = "none";
-        // habilita o campo visível e limpa/desabilita o oculto
         inputValor.disabled = false;
         inputReceber.value = "";
         inputReceber.disabled = true;
@@ -328,7 +332,6 @@
         inputValor.disabled = true;
         inputReceber.focus();
       } else {
-        // nenhum escolhido
         campoCobra.style.display = "none";
         campoReceber.style.display = "none";
         document.getElementById("valor").value = "";
@@ -337,11 +340,11 @@
         document.getElementById("receber").disabled = true;
       }
 
-      // Limpa resultado quando troca de modalidade para evitar confusão
       document.getElementById("resultado").innerHTML = "";
     }
 
     function calcular() {
+      const maquininha = document.getElementById("maquininha").value;
       const modalidade = document.getElementById("modalidade").value;
       const parcelas = parseInt(document.getElementById("parcelas").value);
 
@@ -350,24 +353,51 @@
         return;
       }
 
-      // Taxas de parcelamento
-      const taxasParcelamento = {
-        2: 2.80, 3: 3.58, 4: 4.44, 5: 5.25, 6: 5.80,
-        7: 6.97, 8: 7.53, 9: 8.82, 10: 8.85, 11: 10.27, 12: 10.55
-      };
+      // Restrição: Mercado Pago só vai até 12x
+      if (maquininha === "mercado_pago" && parcelas > 12) {
+        document.getElementById("resultado").innerHTML = "⚠️ O Mercado Pago só aceita parcelamentos em até 12x.";
+        return;
+      }
 
       let taxaProcessamento = 0;
       let taxaParcela = 0;
 
-      if (parcelas === 1) {
-        taxaProcessamento = 3.31;
-        taxaParcela = 0;
-      } else if (parcelas >= 2 && parcelas <= 6) {
-        taxaProcessamento = 2.89;
-        taxaParcela = taxasParcelamento[parcelas];
-      } else if (parcelas >= 7 && parcelas <= 12) {
-        taxaProcessamento = 2.94;
-        taxaParcela = taxasParcelamento[parcelas];
+      if (maquininha === "mercado_pago") {
+        // Taxas Mercado Pago
+        const taxasMercadoPago = {
+          2: 2.80, 3: 3.58, 4: 4.44, 5: 5.25, 6: 5.80,
+          7: 6.97, 8: 7.53, 9: 8.82, 10: 8.85, 11: 10.27, 12: 10.55
+        };
+
+        if (parcelas === 1) {
+          taxaProcessamento = 3.00;
+          taxaParcela = 0;
+        } else if (parcelas >= 2 && parcelas <= 6) {
+          taxaProcessamento = 2.89;
+          taxaParcela = taxasMercadoPago[parcelas];
+        } else if (parcelas >= 7 && parcelas <= 12) {
+          taxaProcessamento = 2.94;
+          taxaParcela = taxasMercadoPago[parcelas];
+        }
+
+      } else if (maquininha === "pagbank") {
+        // Taxas PagBank enviadas por você
+        const taxasPagBank = {
+          2: 3.49, 3: 4.29, 4: 4.99, 5: 5.69, 6: 6.39,
+          7: 7.09, 8: 7.79, 9: 8.49, 10: 9.19, 11: 9.89, 12: 10.49,
+          // 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0 // Nota: Caso de 13x a 18x não tenha taxa de parcela descrita além da intermediação, assume-se 0.
+        };
+
+        if (parcelas === 1) {
+          taxaProcessamento = 3.86;
+          taxaParcela = 0;
+        } else if (parcelas >= 2 && parcelas <= 12) {
+          taxaProcessamento = 2.17; // Intermediação de 2x a 12x
+          taxaParcela = taxasPagBank[parcelas];
+        } else if (parcelas >= 13 && parcelas <= 18) {
+          taxaProcessamento = 3.57; // Intermediação de 13x a 18x
+          taxaParcela = taxasPagBank[parcelas];
+        }
       }
 
       const taxaTotal = taxaProcessamento + taxaParcela;
@@ -394,7 +424,6 @@
         }
         valorLiquido = receberInput;
 
-        // Proteção: caso as taxas somem >= 100% evita divisão por zero/valor infinito
         if (taxaTotal >= 100) {
           document.getElementById("resultado").innerHTML = "⚠️ Taxas muito altas (>=100%), não é possível calcular.";
           return;
@@ -409,7 +438,7 @@
 
       document.getElementById("resultado").innerHTML =
         `<div class="taxas">
-           <p>Taxa de processamento: <b>${taxaProcessamento.toFixed(2)}%</b></p>
+           <p>Taxa de intermediação: <b>${taxaProcessamento.toFixed(2)}%</b></p>
            <p>Taxa de parcelamento: <b>${taxaParcela.toFixed(2)}%</b></p>
            <p>📌 Total de taxas: <b>${taxaTotal.toFixed(2)}%</b></p>
          </div>
@@ -429,4 +458,3 @@
 </body>
 
 </html>
-
